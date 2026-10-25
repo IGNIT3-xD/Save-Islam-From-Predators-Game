@@ -27,30 +27,30 @@
       bombCap: 0.18
     },
     medium: {
-      ramp: 75,
-      baseInterval: 0.9,
-      intervalDrop: 0.58,
-      intervalJitter: [0.82, 1.12],
+      ramp: 90,
+      baseInterval: 0.98,
+      intervalDrop: 0.52,
+      intervalJitter: [0.85, 1.12],
       extraBase: 1,
-      extraStep: 20,
-      extraChance: 0.45,
-      maxCount: 4,
-      bombBase: 0.1,
-      bombSlope: 0.0035,
-      bombCap: 0.3
+      extraStep: 22,
+      extraChance: 0.38,
+      maxCount: 3,
+      bombBase: 0.07,
+      bombSlope: 0.0028,
+      bombCap: 0.24
     },
     hard: {
-      ramp: 55,
-      baseInterval: 0.68,
-      intervalDrop: 0.5,
-      intervalJitter: [0.78, 1.05],
+      ramp: 65,
+      baseInterval: 0.78,
+      intervalDrop: 0.48,
+      intervalJitter: [0.8, 1.08],
       extraBase: 1,
-      extraStep: 14,
-      extraChance: 0.55,
-      maxCount: 5,
-      bombBase: 0.16,
-      bombSlope: 0.0045,
-      bombCap: 0.38
+      extraStep: 16,
+      extraChance: 0.48,
+      maxCount: 4,
+      bombBase: 0.12,
+      bombSlope: 0.0038,
+      bombCap: 0.3
     }
   };
   var START_LIVES = 3;
