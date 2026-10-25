@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1411">
   <meta name="description" content="Fruit Slash is a fast arcade game about punching targets, chaining combos, and dodging bombs.">
-  <title>Fruit Slash — Arcade</title>
+  <title>Save Islam From Predators</title>
   <link rel="icon" type="image/png" href="assets/sprite/icon.png">
   <link rel="apple-touch-icon" href="assets/sprite/icon.png">
   <link rel="stylesheet" href="style.css">
@@ -62,7 +62,7 @@
 
   <main class="stage">
     <canvas id="gameCanvas" class="game-canvas" tabindex="-1" aria-label="Fruit Slash game area">
-      Your browser does not support the canvas element needed to play Fruit Slash.
+      Your browser does not support the canvas element needed to play this game.
     </canvas>
 
     <section id="hud" class="hud hidden" aria-label="Game status">
@@ -106,6 +106,14 @@
         <div class="best-pill">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-trophy"></use></svg>
           <span>Best <strong id="menuBestValue">0</strong></span>
+        </div>
+        <div class="difficulty">
+          <span class="difficulty__label">Difficulty</span>
+          <div class="difficulty__options" role="group" aria-label="Difficulty">
+            <button type="button" class="difficulty__option js-difficulty" data-difficulty="easy" aria-pressed="false">Easy</button>
+            <button type="button" class="difficulty__option js-difficulty is-active" data-difficulty="medium" aria-pressed="true">Medium</button>
+            <button type="button" class="difficulty__option js-difficulty" data-difficulty="hard" aria-pressed="false">Hard</button>
+          </div>
         </div>
         <div class="menu-actions">
           <button id="playBtn" type="button" class="btn btn--primary">

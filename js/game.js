@@ -11,6 +11,48 @@
   }
 
   var HIGH_SCORE_KEY = 'fruitSlash.highScore';
+  var DIFFICULTY_KEY = 'fruitSlash.difficulty';
+  var DIFFICULTIES = {
+    easy: {
+      ramp: 120,
+      baseInterval: 1.2,
+      intervalDrop: 0.55,
+      intervalJitter: [0.9, 1.15],
+      extraBase: 0,
+      extraStep: 25,
+      extraChance: 0.3,
+      maxCount: 3,
+      bombBase: 0.04,
+      bombSlope: 0.0018,
+      bombCap: 0.18
+    },
+    medium: {
+      ramp: 75,
+      baseInterval: 0.9,
+      intervalDrop: 0.58,
+      intervalJitter: [0.82, 1.12],
+      extraBase: 1,
+      extraStep: 20,
+      extraChance: 0.45,
+      maxCount: 4,
+      bombBase: 0.1,
+      bombSlope: 0.0035,
+      bombCap: 0.3
+    },
+    hard: {
+      ramp: 55,
+      baseInterval: 0.68,
+      intervalDrop: 0.5,
+      intervalJitter: [0.78, 1.05],
+      extraBase: 1,
+      extraStep: 14,
+      extraChance: 0.55,
+      maxCount: 5,
+      bombBase: 0.16,
+      bombSlope: 0.0045,
+      bombCap: 0.38
+    }
+  };
   var START_LIVES = 3;
   var COMBO_WINDOW = 0.6;
   var MAX_DPR = 1.5;
@@ -52,7 +94,9 @@
   };
 
   var soundToggles = Array.prototype.slice.call(document.querySelectorAll('.js-sound-toggle'));
+  var difficultyButtons = Array.prototype.slice.call(document.querySelectorAll('.js-difficulty'));
   var highScore = loadHighScore();
+  var selectedDifficulty = loadDifficulty();
   var resizeFrame = 0;
   var backgroundGradient = null;
 
@@ -99,6 +143,48 @@
     } catch (error) {
       return;
     }
+  }
+
+  function loadDifficulty() {
+    try {
+      var value = localStorage.getItem(DIFFICULTY_KEY);
+
+      if (value && DIFFICULTIES[value]) {
+        return value;
+      }
+    } catch (error) {
+      return 'medium';
+    }
+
+    return 'medium';
+  }
+
+  function saveDifficulty() {
+    try {
+      localStorage.setItem(DIFFICULTY_KEY, selectedDifficulty);
+    } catch (error) {
+      return;
+    }
+  }
+
+  function updateDifficultyUI() {
+    difficultyButtons.forEach(function (button) {
+      var active = button.getAttribute('data-difficulty') === selectedDifficulty;
+
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function selectDifficulty(name) {
+    if (!DIFFICULTIES[name] || name === selectedDifficulty) {
+      return;
+    }
+
+    selectedDifficulty = name;
+    saveDifficulty();
+    updateDifficultyUI();
+    announce(name.charAt(0).toUpperCase() + name.slice(1) + ' difficulty.');
   }
 
   function announce(message) {
@@ -405,28 +491,28 @@
   }
 
   function spawnWave() {
-    var difficulty = clamp(state.elapsed / 100, 0, 1);
-    var maxExtra = Math.min(2, Math.floor(state.elapsed / 24));
+    var profile = DIFFICULTIES[selectedDifficulty];
+    var progress = clamp(state.elapsed / profile.ramp, 0, 1);
+    var maxExtra = Math.min(profile.maxCount - 1, profile.extraBase + Math.floor(state.elapsed / profile.extraStep));
     var count = 1 + Math.floor(Math.random() * (maxExtra + 1));
     var delay = 0;
     var i;
 
-    state.spawnTimer = (1.15 - difficulty * 0.62) * rand(0.85, 1.15);
+    state.spawnTimer = (profile.baseInterval - progress * profile.intervalDrop)
+      * rand(profile.intervalJitter[0], profile.intervalJitter[1]);
 
-    if (Math.random() < difficulty * 0.35) {
+    if (Math.random() < progress * profile.extraChance) {
       count += 1;
     }
 
-    count = Math.min(count, 3);
+    count = Math.min(count, profile.maxCount);
 
     for (i = 0; i < count; i += 1) {
       state.pending.push({ delay: delay, isBomb: false });
-      delay += rand(0.12, 0.2);
+      delay += rand(0.1, 0.18);
     }
 
-    var bombChance = state.elapsed < 10
-      ? 0
-      : Math.min(0.24, 0.05 + (state.elapsed - 10) * 0.0035);
+    var bombChance = Math.min(profile.bombCap, profile.bombBase + state.elapsed * profile.bombSlope);
 
     if (Math.random() < bombChance) {
       state.pending.push({ delay: rand(0.05, Math.max(0.08, delay)), isBomb: true });
@@ -729,6 +815,12 @@
     soundToggles.forEach(function (button) {
       button.addEventListener('click', toggleSound);
     });
+
+    difficultyButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        selectDifficulty(button.getAttribute('data-difficulty'));
+      });
+    });
   }
 
   function bindInput() {
@@ -766,6 +858,7 @@
     sound.init();
     resize();
     updateSoundUI();
+    updateDifficultyUI();
     updateBestUI();
     updateScoreUI();
     renderLives();
