@@ -14,47 +14,48 @@
   var DIFFICULTY_KEY = 'fruitSlash.difficulty';
   var DIFFICULTIES = {
     easy: {
-      ramp: 120,
-      baseInterval: 1.2,
-      intervalDrop: 0.55,
-      intervalJitter: [0.9, 1.15],
+      ramp: 150,
+      baseInterval: 1.55,
+      intervalDrop: 0.5,
+      intervalJitter: [1, 1.2],
       extraBase: 0,
-      extraStep: 25,
-      extraChance: 0.3,
-      maxCount: 3,
-      bombBase: 0.04,
-      bombSlope: 0.0018,
-      bombCap: 0.18
+      extraStep: 34,
+      extraChance: 0.22,
+      maxCount: 2,
+      bombBase: 0.02,
+      bombSlope: 0.0012,
+      bombCap: 0.12
     },
     medium: {
-      ramp: 90,
-      baseInterval: 0.98,
-      intervalDrop: 0.52,
-      intervalJitter: [0.85, 1.12],
-      extraBase: 1,
-      extraStep: 22,
-      extraChance: 0.38,
+      ramp: 120,
+      baseInterval: 1.36,
+      intervalDrop: 0.46,
+      intervalJitter: [0.93, 1.17],
+      extraBase: 0,
+      extraStep: 32,
+      extraChance: 0.26,
       maxCount: 3,
-      bombBase: 0.07,
-      bombSlope: 0.0028,
-      bombCap: 0.24
+      bombBase: 0.05,
+      bombSlope: 0.002,
+      bombCap: 0.17
     },
     hard: {
-      ramp: 65,
-      baseInterval: 0.78,
-      intervalDrop: 0.48,
-      intervalJitter: [0.8, 1.08],
+      ramp: 95,
+      baseInterval: 1.12,
+      intervalDrop: 0.45,
+      intervalJitter: [0.9, 1.13],
       extraBase: 1,
-      extraStep: 16,
-      extraChance: 0.48,
+      extraStep: 26,
+      extraChance: 0.35,
       maxCount: 4,
-      bombBase: 0.12,
-      bombSlope: 0.0038,
-      bombCap: 0.3
+      bombBase: 0.08,
+      bombSlope: 0.0028,
+      bombCap: 0.22
     }
   };
   var START_LIVES = 3;
   var COMBO_WINDOW = 0.6;
+  var COMBO_MILESTONE = 10;
   var MAX_DPR = 1.5;
   var PUNCH_LIFE = 0.17;
   var PUNCH_SIZE = 92;
@@ -116,6 +117,7 @@
     fruits: [],
     pending: [],
     punches: [],
+    floaters: [],
     lastHitAt: -10,
     lastFrame: 0
   };
@@ -292,6 +294,7 @@
     state.fruits.length = 0;
     state.pending.length = 0;
     state.punches.length = 0;
+    state.floaters.length = 0;
     state.lastHitAt = -10;
     hideCombo();
     el.newBest.classList.add('hidden');
@@ -576,6 +579,33 @@
     }
   }
 
+  function addFloater(x, y, text, big) {
+    state.floaters.push({
+      x: x,
+      y: y,
+      text: text,
+      big: !!big,
+      life: 0.85,
+      maxLife: 0.85
+    });
+
+    if (state.floaters.length > 8) {
+      state.floaters.shift();
+    }
+  }
+
+  function updateFloaters(dt) {
+    for (var i = state.floaters.length - 1; i >= 0; i -= 1) {
+      var floater = state.floaters[i];
+      floater.life -= dt;
+      floater.y -= 46 * dt;
+
+      if (floater.life <= 0) {
+        state.floaters.splice(i, 1);
+      }
+    }
+  }
+
   function showCombo() {
     el.comboValue.textContent = 'x' + state.combo;
     el.combo.classList.add('show');
@@ -652,14 +682,26 @@
     state.lastHitAt = state.elapsed;
     state.comboTimer = COMBO_WINDOW;
 
-    var bonus = state.combo >= 3 ? (state.combo - 2) * 5 : 0;
-    state.score += 10 + bonus;
+    var multiplier = 1 + Math.floor(state.combo / COMBO_MILESTONE);
+    var points = 10 * multiplier;
+    var milestone = state.combo >= COMBO_MILESTONE && state.combo % COMBO_MILESTONE === 0
+      ? state.combo * 5
+      : 0;
+
+    state.score += points + milestone;
     updateScoreUI();
+    addFloater(entity.x, entity.y, '+' + points, false);
+
+    if (milestone) {
+      addFloater(entity.x, entity.y - entity.r, '+' + milestone + ' BONUS', true);
+    }
 
     if (state.combo >= 3) {
       showCombo();
 
-      if (state.combo === 3 || state.combo % 3 === 0) {
+      if (milestone) {
+        announce('Combo x' + state.combo + '! ' + points + ' points per hit, plus ' + milestone + ' bonus.');
+      } else if (state.combo === 3 || state.combo % 3 === 0) {
         announce('Combo x' + state.combo + '!');
       }
     } else {
@@ -706,6 +748,7 @@
     if (state.phase === 'bomb') {
       state.bombTimer -= dt;
       updatePunches(dt);
+      updateFloaters(dt);
 
       if (state.bombTimer <= 0) {
         endGame();
@@ -728,6 +771,7 @@
     updateSpawner(dt);
     updateEntities(dt);
     updatePunches(dt);
+    updateFloaters(dt);
   }
 
   function render() {
@@ -752,6 +796,25 @@
       var size = PUNCH_SIZE * state.scale * (0.9 + progress * 0.25);
       var alpha = Math.max(0, punch.life / punch.maxLife);
       V.draw(ctx, 'punch', punch.x, punch.y, size, alpha);
+    }
+
+    for (var k = 0; k < state.floaters.length; k += 1) {
+      var floater = state.floaters[k];
+      var ratio = floater.life / floater.maxLife;
+      var textAlpha = Math.max(0, Math.min(1, ratio * 1.7));
+      var textSize = (floater.big ? 30 : 22) * state.scale;
+
+      ctx.save();
+      ctx.globalAlpha = textAlpha;
+      ctx.font = '900 ' + textSize + 'px Impact, "Arial Black", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = Math.max(3, textSize * 0.16);
+      ctx.strokeStyle = 'rgba(22, 9, 0, .85)';
+      ctx.strokeText(floater.text, floater.x, floater.y);
+      ctx.fillStyle = floater.big ? '#ffd45f' : '#fff6dd';
+      ctx.fillText(floater.text, floater.x, floater.y);
+      ctx.restore();
     }
   }
 
