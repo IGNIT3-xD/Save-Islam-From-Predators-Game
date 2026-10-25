@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1411">
+  <meta name="description" content="Fruit Slash is a fast arcade game about punching targets, chaining combos, and dodging bombs.">
+  <title>Fruit Slash — Arcade</title>
+  <link rel="icon" type="image/png" href="assets/sprite/icon.png">
+  <link rel="apple-touch-icon" href="assets/sprite/icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true">
+    <symbol id="icon-speaker" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+        <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+        <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
+      </g>
+    </symbol>
+    <symbol id="icon-mute" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+        <path d="m16 9 5 6"></path>
+        <path d="m21 9-5 6"></path>
+      </g>
+    </symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24">
+      <path d="M8 5.4c0-.8.9-1.3 1.6-.9l9.2 5.7c.7.4.7 1.5 0 1.9l-9.2 6.5c-.7.5-1.6 0-1.6-.8V5.4Z" fill="currentColor"></path>
+    </symbol>
+    <symbol id="icon-exit" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 4H5v16h5"></path>
+        <path d="M14 8l4 4-4 4"></path>
+        <path d="M18 12H9"></path>
+      </g>
+    </symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24">
+      <g fill="currentColor">
+        <rect x="7" y="5" width="3.5" height="14" rx="1.2"></rect>
+        <rect x="13.5" y="5" width="3.5" height="14" rx="1.2"></rect>
+      </g>
+    </symbol>
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path d="M12 20.4 10.6 19C5.4 14.3 2 11.2 2 7.5 2 4.5 4.3 2.3 7.2 2.3c1.7 0 3.4.8 4.8 2.3 1.4-1.5 3.1-2.3 4.8-2.3 2.9 0 5.2 2.2 5.2 5.2 0 3.7-3.4 6.8-8.6 11.5L12 20.4Z" fill="currentColor"></path>
+    </symbol>
+    <symbol id="icon-trophy" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"></path>
+        <path d="M8 6H4v2a4 4 0 0 0 4 4"></path>
+        <path d="M16 6h4v2a4 4 0 0 1-4 4"></path>
+        <path d="M12 13v4"></path>
+        <path d="M8 21h8"></path>
+        <path d="M9 17h6v4H9z"></path>
+      </g>
+    </symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </symbol>
+  </svg>
+
+  <main class="stage">
+    <canvas id="gameCanvas" class="game-canvas" tabindex="-1" aria-label="Fruit Slash game area">
+      Your browser does not support the canvas element needed to play Fruit Slash.
+    </canvas>
+
+    <section id="hud" class="hud hidden" aria-label="Game status">
+      <div class="hud-top">
+        <div class="hud-left">
+          <div class="stat stat--score">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="scoreValue">0</span>
+          </div>
+          <div class="stat stat--best">
+            <span class="stat-label">Best</span>
+            <span class="stat-value stat-value--small" id="hudBestValue">0</span>
+          </div>
+        </div>
+        <div class="hud-actions">
+          <div class="lives" id="lives" aria-label="3 lives">
+            <span class="life"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-heart"></use></svg></span>
+            <span class="life"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-heart"></use></svg></span>
+            <span class="life"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-heart"></use></svg></span>
+          </div>
+          <button id="hudSoundBtn" type="button" class="icon-btn js-sound-toggle" data-sound="on" aria-pressed="true" aria-label="Mute sound">
+            <svg class="icon icon--sound-on" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-speaker"></use></svg>
+            <svg class="icon icon--sound-off" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-mute"></use></svg>
+          </button>
+          <button id="pauseBtn" type="button" class="icon-btn" aria-label="Pause game">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-pause"></use></svg>
+          </button>
+        </div>
+      </div>
+      <div id="comboBadge" class="combo-badge" aria-hidden="true">Combo <strong>x3</strong></div>
+    </section>
+
+    <section id="menuScreen" class="screen screen--menu active" aria-labelledby="gameTitle">
+      <div class="panel panel--menu">
+        <div class="brand-mark">
+          <img src="assets/sprite/icon.png" alt="" width="120" height="120">
+        </div>
+        <p class="brand-kicker">Punch those predators</p>
+        <h1 id="gameTitle" class="brand-title">Save Islam From <span class="brand-title__accent">Predators</span></h1>
+        <p class="brand-tagline">Punch the predators faces. Dodge the bombs. Chase the high score.</p>
+        <div class="best-pill">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-trophy"></use></svg>
+          <span>Best <strong id="menuBestValue">0</strong></span>
+        </div>
+        <div class="menu-actions">
+          <button id="playBtn" type="button" class="btn btn--primary">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-play"></use></svg>
+            <span>Play</span>
+          </button>
+          <button id="exitBtn" type="button" class="btn btn--ghost">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-exit"></use></svg>
+            <span>Exit</span>
+          </button>
+        </div>
+        <button type="button" class="sound-toggle js-sound-toggle" data-sound="on" aria-pressed="true">
+          <span class="sound-toggle__icon">
+            <svg class="icon icon--sound-on" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-speaker"></use></svg>
+            <svg class="icon icon--sound-off" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-mute"></use></svg>
+          </span>
+          <span class="sound-toggle__label" data-sound-label>Sound On</span>
+          <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+        </button>
+        <p class="menu-hint"><span>Click or tap to punch</span><span>3 lives</span><span>Bombs end the run</span></p>
+      </div>
+      <p class="screen-footnote">Built for mouse and touch</p>
+    </section>
+
+    <section id="pauseScreen" class="screen screen--overlay" aria-labelledby="pauseTitle" aria-hidden="true">
+      <div class="panel panel--small">
+        <p class="eyebrow">Take a breath</p>
+        <h2 id="pauseTitle" class="panel-title">Paused</h2>
+        <p class="panel-copy">Current score <strong id="pauseScore">0</strong></p>
+        <div class="stack">
+          <button id="resumeBtn" type="button" class="btn btn--primary">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-play"></use></svg>
+            <span>Resume</span>
+          </button>
+          <button id="restartBtn" type="button" class="btn btn--ghost">Restart Run</button>
+          <button id="pauseMenuBtn" type="button" class="btn btn--ghost">Main Menu</button>
+          <button type="button" class="sound-toggle sound-toggle--compact js-sound-toggle" data-sound="on" aria-pressed="true">
+            <span class="sound-toggle__icon">
+              <svg class="icon icon--sound-on" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-speaker"></use></svg>
+              <svg class="icon icon--sound-off" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-mute"></use></svg>
+            </span>
+            <span class="sound-toggle__label" data-sound-label>Sound On</span>
+            <span class="toggle-track" aria-hidden="true"><span class="toggle-knob"></span></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="gameOverScreen" class="screen screen--overlay" aria-labelledby="gameOverTitle" aria-hidden="true">
+      <div class="panel panel--small panel--gameover">
+        <p class="eyebrow">Run over</p>
+        <h2 id="gameOverTitle" class="panel-title">Good hits!</h2>
+        <div id="newBestBadge" class="new-best hidden">New Best</div>
+        <div class="final-score">
+          <span class="final-score__label">Final Score</span>
+          <span class="final-score__value" id="finalScore">0</span>
+          <span class="final-score__best">Best <strong id="finalBest">0</strong></span>
+        </div>
+        <div class="stack">
+          <button id="playAgainBtn" type="button" class="btn btn--primary">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-play"></use></svg>
+            <span>Play Again</span>
+          </button>
+          <button id="gameOverMenuBtn" type="button" class="btn btn--ghost">Main Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="goodbyeScreen" class="screen screen--overlay" aria-labelledby="goodbyeTitle" aria-hidden="true">
+      <div class="panel panel--small">
+        <div class="goodbye-mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-moon"></use></svg>
+        </div>
+        <p class="eyebrow">Until next time</p>
+        <h2 id="goodbyeTitle" class="panel-title">Thanks for playing</h2>
+        <p class="panel-copy">If this tab is still open, your browser blocked the automatic close. You can safely close it, or head back to the dojo.</p>
+        <div class="stack">
+          <button id="goodbyeMenuBtn" type="button" class="btn btn--primary">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-exit"></use></svg>
+            <span>Back to Menu</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="srAnnounce" class="sr-only" aria-live="polite"></div>
+
+  <script src="js/sound.js"></script>
+  <script src="js/visuals.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
